@@ -1,0 +1,52 @@
+.tic-tac-toe-board {
+  display: inline-block;
+  border: 2px solid #333;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  padding: 10px;
+  margin: 20px 0;
+}
+
+.board-row {
+  display: flex;
+}
+
+.cell {
+  width: 80px;
+  height: 80px;
+  border: 2px solid #333;
+  background-color: white;
+  font-size: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell:hover:not(.disabled):not(.filled) {
+  background-color: #e9ecef;
+  transform: scale(1.05);
+}
+
+.cell.filled {
+  cursor: not-allowed;
+}
+
+.cell.x {
+  color: #007bff;
+}
+
+.cell.o {
+  color: #dc3545;
+}
+
+.cell.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cell:focus {
+  outline: 2px solid #007bff;
+}

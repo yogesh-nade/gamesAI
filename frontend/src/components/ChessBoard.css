@@ -1,0 +1,138 @@
+.chess-board-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.chess-board {
+  display: grid;
+  grid-template-columns: repeat(8, 60px);
+  grid-template-rows: repeat(8, 60px);
+  border: 2px solid #8B4513;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.chess-square {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+}
+
+.chess-square.light {
+  background-color: #f0d9b5;
+}
+
+.chess-square.dark {
+  background-color: #b58863;
+}
+
+.chess-square:hover {
+  filter: brightness(1.1);
+}
+
+.chess-square.selected {
+  background-color: #ffd700 !important;
+  box-shadow: inset 0 0 0 3px #ffaa00;
+}
+
+.chess-square.highlighted {
+  background-color: rgba(255, 255, 0, 0.5) !important;
+  border: 2px solid #00ff00;
+}
+
+.chess-piece {
+  font-size: 40px;
+  cursor: grab;
+  transition: transform 0.2s ease;
+  z-index: 10;
+}
+
+.chess-piece:hover {
+  transform: scale(1.1);
+}
+
+.chess-piece:active {
+  cursor: grabbing;
+  transform: scale(0.95);
+}
+
+.chess-piece.white {
+  color: #ffffff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.chess-piece.black {
+  color: #000000;
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+/* Coordinate labels */
+.rank-label {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  font-size: 10px;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.file-label {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 10px;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.chess-square.dark .rank-label,
+.chess-square.dark .file-label {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .chess-board {
+    grid-template-columns: repeat(8, 45px);
+    grid-template-rows: repeat(8, 45px);
+  }
+  
+  .chess-square {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .chess-piece {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chess-board {
+    grid-template-columns: repeat(8, 35px);
+    grid-template-rows: repeat(8, 35px);
+  }
+  
+  .chess-square {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .chess-piece {
+    font-size: 24px;
+  }
+  
+  .rank-label,
+  .file-label {
+    font-size: 8px;
+  }
+}
