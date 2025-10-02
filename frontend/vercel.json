@@ -12,11 +12,20 @@
   "routes": [
     {
       "src": "/static/(.*)",
+      "headers": { "cache-control": "s-maxage=31536000,immutable" },
       "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*\\.(css|js|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$)",
+      "headers": { "cache-control": "s-maxage=31536000,immutable" },
+      "dest": "/$1"
     },
     {
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "REACT_APP_API_BASE_URL": "https://gamesai-backend-ninm.onrender.com"
+  }
 }
