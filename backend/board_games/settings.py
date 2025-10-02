@@ -200,6 +200,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "https://localhost:3000",
     "https://127.0.0.1:3000",
+    # Vercel deployment URLs (add your actual domain once deployed)
+    "https://*.vercel.app",
 ]
 
 # Allow specific headers
