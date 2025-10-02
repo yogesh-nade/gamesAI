@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import ChessBoard from '../components/ChessBoard';
@@ -19,9 +19,9 @@ const ChessPage = () => {
 
   useEffect(() => {
     fetchGameState();
-  }, [matchId]);
+  }, [matchId, fetchGameState]);
 
-  const fetchGameState = async () => {
+  const fetchGameState = useCallback(async () => {
     try {
       const response = await gamesAPI.getChessMatch(matchId);
       setGameState(response.data);
@@ -38,7 +38,7 @@ const ChessPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [matchId]);
 
   const handleSquareClick = async (fromRow, fromCol, toRow, toCol) => {
     if (makingMove || gameOver) return;

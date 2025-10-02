@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import TicTacToeBoard from '../components/TicTacToeBoard';
@@ -17,9 +17,9 @@ const TicTacToePage = () => {
 
   useEffect(() => {
     fetchGameState();
-  }, [matchId]);
+  }, [matchId, fetchGameState]);
 
-  const fetchGameState = async () => {
+  const fetchGameState = useCallback(async () => {
     try {
       const response = await gamesAPI.getTicTacToeMatch(matchId);
       setGameState(response.data);
@@ -35,7 +35,7 @@ const TicTacToePage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [matchId]);
 
   const handleCellClick = async (row, col) => {
     if (making_move || gameOver) return;
