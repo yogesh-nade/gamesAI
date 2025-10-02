@@ -396,6 +396,14 @@ class ChessMatch(models.Model):
         self.set_piece_at(to_row, to_col, piece)
         self.set_piece_at(from_row, from_col, '')
         
+        # Handle pawn promotion (auto-promote to Queen)
+        if piece.lower() == 'p':  # It's a pawn
+            if (piece == 'P' and to_row == 0) or (piece == 'p' and to_row == 7):
+                # White pawn reaches row 0, or black pawn reaches row 7
+                promoted_piece = 'Q' if piece == 'P' else 'q'
+                self.set_piece_at(to_row, to_col, promoted_piece)
+                print(f"Pawn promoted to Queen at ({to_row}, {to_col})")
+        
         # Check if this move puts own king in check (invalid)
         if self.is_in_check(self.current_player):
             # Undo move
@@ -481,8 +489,8 @@ class ChessMatch(models.Model):
             # Auto-promote pawns to queens
             piece = board.piece_at(from_square)
             if piece and piece.piece_type == chess.PAWN:
-                if (piece.color == chess.WHITE and 7 - to_row == 0) or \
-                   (piece.color == chess.BLACK and 7 - to_row == 7):
+                if (piece.color == chess.WHITE and to_row == 0) or \
+                   (piece.color == chess.BLACK and to_row == 7):
                     move = chess.Move(from_square, to_square, promotion=chess.QUEEN)
             
             # Check if move is legal
