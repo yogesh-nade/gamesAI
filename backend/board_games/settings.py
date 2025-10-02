@@ -201,6 +201,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://localhost:3000",
     "https://127.0.0.1:3000",
     # Vercel deployment URLs (add your actual domain once deployed)
+    "https://games-ai-taupe.vercel.app"
     "https://*.vercel.app",
 ]
 
