@@ -15,10 +15,6 @@ const TicTacToePage = () => {
   const [winner, setWinner] = useState(null);
   const [result, setResult] = useState(null);
 
-  useEffect(() => {
-    fetchGameState();
-  }, [matchId, fetchGameState]);
-
   const fetchGameState = useCallback(async () => {
     try {
       const response = await gamesAPI.getTicTacToeMatch(matchId);
@@ -36,6 +32,10 @@ const TicTacToePage = () => {
       setLoading(false);
     }
   }, [matchId]);
+
+  useEffect(() => {
+    fetchGameState();
+  }, [fetchGameState]);
 
   const handleCellClick = async (row, col) => {
     if (making_move || gameOver) return;

@@ -17,10 +17,6 @@ const ChessPage = () => {
   const [legalMoves, setLegalMoves] = useState([]);
   const [isInCheck, setIsInCheck] = useState({ white: false, black: false });
 
-  useEffect(() => {
-    fetchGameState();
-  }, [matchId, fetchGameState]);
-
   const fetchGameState = useCallback(async () => {
     try {
       const response = await gamesAPI.getChessMatch(matchId);
@@ -39,6 +35,10 @@ const ChessPage = () => {
       setLoading(false);
     }
   }, [matchId]);
+
+  useEffect(() => {
+    fetchGameState();
+  }, [fetchGameState]);
 
   const handleSquareClick = async (fromRow, fromCol, toRow, toCol) => {
     if (makingMove || gameOver) return;
