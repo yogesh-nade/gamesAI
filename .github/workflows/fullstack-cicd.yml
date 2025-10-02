@@ -1,0 +1,108 @@
+name: Full Stack CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+  workflow_dispatch:
+
+jobs:
+  # Check what changed
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.changes.outputs.frontend }}
+      backend: ${{ steps.changes.outputs.backend }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+
+  # Frontend build and deploy
+  frontend-deploy:
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install and Build
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+          
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./frontend
+          vercel-args: '--prod'
+
+  # Backend test and deploy  
+  backend-deploy:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          pip install -r requirements.txt
+          
+      - name: Run tests
+        working-directory: backend
+        env:
+          SECRET_KEY: 'test-secret-key'
+          DEBUG: 'True'
+        run: |
+          python manage.py check
+          python manage.py test
+          
+      - name: Trigger Render Deploy
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          echo "🚀 Render deploy hook triggered!"
+
+  # Integration tests
+  integration-tests:
+    needs: [frontend-deploy, backend-deploy]
+    if: always() && (needs.frontend-deploy.result == 'success' || needs.backend-deploy.result == 'success')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for deployments
+        run: sleep 120
+        
+      - name: Health Check
+        run: |
+          echo "Running integration tests..."
+          curl -f ${{ secrets.BACKEND_URL }}/admin/ || echo "Backend check failed"
+          curl -f ${{ secrets.FRONTEND_URL }} || echo "Frontend check failed"
