@@ -81,10 +81,12 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           echo "Current directory: $(pwd)"
-          echo "Files in current directory:"
-          ls -la
-          npx vercel@latest --version
-          npx vercel@latest deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
+          echo "Removing existing .vercel directory to reset configuration"
+          rm -rf .vercel
+          echo "Creating fresh Vercel project link"
+          npx vercel@latest link --yes --token=${{ secrets.VERCEL_TOKEN }}
+          echo "Deploying to production"
+          npx vercel@latest deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
 
   # Notification job
   notify:
