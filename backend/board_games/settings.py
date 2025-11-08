@@ -97,7 +97,18 @@ if os.getenv('DATABASE_URL'):
     # Production database (PostgreSQL on Render)
     import dj_database_url
     DATABASES = {
-        'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
+        'default': dj_database_url.parse(
+            os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+    # Fix SSL connection issues on Render
+    DATABASES['default']['OPTIONS'] = {
+        'sslmode': 'require',
+        'sslcert': None,
+        'sslkey': None,
+        'sslrootcert': None,
     }
 else:
     # Development database (SQLite)
