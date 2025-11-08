@@ -79,7 +79,7 @@ jobs:
         run: |
           echo "Current directory: $(pwd)"
           echo "Deploying build directory directly to Vercel"
-          npx vercel@latest deploy ./build --prod --token=${{ secrets.VERCEL_TOKEN }} --name=games-ai-frontend
+          npx vercel@latest deploy ./build --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
 
   # Notification job
   notify:
