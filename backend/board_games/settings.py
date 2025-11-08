@@ -105,15 +105,19 @@ if os.getenv('DATABASE_URL'):
         conn_health_checks=True,
     )
     
+    # Ensure PORT is set correctly
+    if not db_config.get('PORT'):
+        db_config['PORT'] = 5432
+    
     # Handle SSL configuration based on environment
     db_host = db_config.get('HOST', '')
     print(f"Database host: {db_host}")
     
     if 'render.com' in db_host or 'oregon-postgres.render.com' in db_host:
-        # Render-specific configuration - try without SSL first
-        print("Using Render PostgreSQL configuration without SSL")
+        # Render-specific SSL configuration - use 'prefer' for more flexible SSL
+        print("Using Render PostgreSQL configuration with flexible SSL")
         db_config['OPTIONS'] = {
-            'sslmode': 'disable',
+            'sslmode': 'prefer',  # More flexible than 'require'
             'connect_timeout': 30,
             'application_name': 'django_board_games',
         }
