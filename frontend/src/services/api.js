@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = 'https://gamesai-backend-ninm.onrender.com';
 
-// Create axios instance ...
+// Create axios instance ....
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {

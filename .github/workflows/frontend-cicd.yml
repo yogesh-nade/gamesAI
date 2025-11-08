@@ -76,17 +76,10 @@ jobs:
         
       - name: Deploy to Vercel
         working-directory: frontend
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           echo "Current directory: $(pwd)"
-          echo "Removing existing .vercel directory to reset configuration"
-          rm -rf .vercel
-          echo "Creating fresh Vercel project link"
-          npx vercel@latest link --yes --token=${{ secrets.VERCEL_TOKEN }}
-          echo "Deploying to production"
-          npx vercel@latest deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+          echo "Deploying build directory directly to Vercel"
+          npx vercel@latest deploy ./build --prod --token=${{ secrets.VERCEL_TOKEN }} --name=games-ai-frontend
 
   # Notification job
   notify:
