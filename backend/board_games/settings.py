@@ -102,7 +102,7 @@ if os.getenv('DATABASE_URL'):
     parsed = urlparse(database_url)
     
     if 'render.com' in parsed.hostname or 'oregon-postgres.render.com' in parsed.hostname:
-        # Simplified Render PostgreSQL configuration
+        # Simplified Render PostgreSQL configuration - try without SSL
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
@@ -111,6 +111,9 @@ if os.getenv('DATABASE_URL'):
                 'PASSWORD': parsed.password,
                 'HOST': parsed.hostname,
                 'PORT': parsed.port or 5432,
+                'OPTIONS': {
+                    'sslmode': 'disable',
+                },
             }
         }
     else:
