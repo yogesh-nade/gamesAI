@@ -94,7 +94,7 @@ WSGI_APPLICATION = 'board_games.wsgi.application'
 import os
 
 if os.getenv('DATABASE_URL'):
-    # Production database (PostgreSQL on Render)
+    # Production/Test database (PostgreSQL)
     import dj_database_url
     DATABASES = {
         'default': dj_database_url.parse(
@@ -103,13 +103,16 @@ if os.getenv('DATABASE_URL'):
             conn_health_checks=True,
         )
     }
-    # Fix SSL connection issues on Render
-    DATABASES['default']['OPTIONS'] = {
-        'sslmode': 'require',
-        'sslcert': None,
-        'sslkey': None,
-        'sslrootcert': None,
-    }
+    # Only apply SSL settings for non-localhost connections (production)
+    db_host = DATABASES['default'].get('HOST', '')
+    if db_host and 'localhost' not in db_host and '127.0.0.1' not in db_host:
+        # Fix SSL connection issues on Render
+        DATABASES['default']['OPTIONS'] = {
+            'sslmode': 'require',
+            'sslcert': None,
+            'sslkey': None,
+            'sslrootcert': None,
+        }
 else:
     # Development database (SQLite)
     DATABASES = {
