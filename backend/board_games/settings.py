@@ -96,23 +96,38 @@ import os
 if os.getenv('DATABASE_URL'):
     # Production/Test database (PostgreSQL)
     import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.parse(
-            os.getenv('DATABASE_URL'),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-    # Only apply SSL settings for non-localhost connections (production)
-    db_host = DATABASES['default'].get('HOST', '')
-    if db_host and 'localhost' not in db_host and '127.0.0.1' not in db_host:
-        # Fix SSL connection issues on Render
-        DATABASES['default']['OPTIONS'] = {
-            'sslmode': 'require',
-            'sslcert': None,
-            'sslkey': None,
-            'sslrootcert': None,
+    
+    print(f"DATABASE_URL environment variable: {os.getenv('DATABASE_URL')[:50]}...")
+    
+    db_config = dj_database_url.parse(
+        os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+    
+    # Handle SSL configuration based on environment
+    db_host = db_config.get('HOST', '')
+    print(f"Database host: {db_host}")
+    
+    if 'render.com' in db_host or 'oregon-postgres.render.com' in db_host:
+        # Render-specific configuration - try without SSL first
+        print("Using Render PostgreSQL configuration without SSL")
+        db_config['OPTIONS'] = {
+            'sslmode': 'disable',
+            'connect_timeout': 30,
+            'application_name': 'django_board_games',
         }
+    elif db_host and 'localhost' not in db_host and '127.0.0.1' not in db_host:
+        # Other production PostgreSQL with standard SSL
+        print("Using standard PostgreSQL SSL configuration")
+        db_config['OPTIONS'] = {
+            'sslmode': 'require',
+        }
+    else:
+        print("Using localhost PostgreSQL configuration")
+    
+    print(f"Final database config: {db_config}")
+    DATABASES = {'default': db_config}
 else:
     # Development database (SQLite)
     DATABASES = {
