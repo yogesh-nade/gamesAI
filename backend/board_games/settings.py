@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 from decouple import config, Csv
+import os
+import dj_database_url
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -95,43 +98,59 @@ import os
 
 if os.getenv('DATABASE_URL'):
     # Production/Test database (PostgreSQL)
-    import dj_database_url
     
-    print(f"DATABASE_URL environment variable: {os.getenv('DATABASE_URL')[:50]}...")
+    database_url = os.getenv('DATABASE_URL')
+    print(f"DATABASE_URL environment variable: {database_url[:50]}...")
     
-    db_config = dj_database_url.parse(
-        os.getenv('DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
+    # Parse URL manually for better control over SSL settings
+    parsed = urlparse(database_url)
     
-    # Ensure PORT is set correctly
-    if not db_config.get('PORT'):
-        db_config['PORT'] = 5432
-    
-    # Handle SSL configuration based on environment
-    db_host = db_config.get('HOST', '')
-    print(f"Database host: {db_host}")
-    
-    if 'render.com' in db_host or 'oregon-postgres.render.com' in db_host:
-        # Render-specific SSL configuration - use 'prefer' for more flexible SSL
-        print("Using Render PostgreSQL configuration with flexible SSL")
-        db_config['OPTIONS'] = {
-            'sslmode': 'prefer',  # More flexible than 'require'
-            'connect_timeout': 30,
-            'application_name': 'django_board_games',
-        }
-    elif db_host and 'localhost' not in db_host and '127.0.0.1' not in db_host:
-        # Other production PostgreSQL with standard SSL
-        print("Using standard PostgreSQL SSL configuration")
-        db_config['OPTIONS'] = {
-            'sslmode': 'require',
+    if 'render.com' in parsed.hostname or 'oregon-postgres.render.com' in parsed.hostname:
+        print("Using manual Render PostgreSQL configuration")
+        # Manual configuration for Render PostgreSQL
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': parsed.path[1:],  # Remove leading slash
+                'USER': parsed.username,
+                'PASSWORD': parsed.password,
+                'HOST': parsed.hostname,
+                'PORT': parsed.port or 5432,
+                'CONN_MAX_AGE': 600,
+                'CONN_HEALTH_CHECKS': True,
+                'OPTIONS': {
+                    'sslmode': 'require',
+                    'connect_timeout': 30,
+                }
+            }
         }
     else:
-        print("Using localhost PostgreSQL configuration")
+        # Use dj_database_url for other cases
+        db_config = dj_database_url.parse(
+            database_url,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+        
+        # Ensure PORT is set correctly
+        if not db_config.get('PORT'):
+            db_config['PORT'] = 5432
+        
+        db_host = db_config.get('HOST', '')
+        print(f"Database host: {db_host}")
+        
+        if db_host and 'localhost' not in db_host and '127.0.0.1' not in db_host:
+            # Other production PostgreSQL with standard SSL
+            print("Using standard PostgreSQL SSL configuration")
+            db_config['OPTIONS'] = {
+                'sslmode': 'require',
+            }
+        else:
+            print("Using localhost PostgreSQL configuration")
+        
+        DATABASES = {'default': db_config}
     
-    print(f"Final database config: {db_config}")
-    DATABASES = {'default': db_config}
+    print(f"Final database config: {DATABASES['default']}")
 else:
     # Development database (SQLite)
     DATABASES = {
