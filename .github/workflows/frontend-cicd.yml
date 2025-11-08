@@ -79,9 +79,12 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          npx vercel@latest --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
+          echo "Current directory: $(pwd)"
+          echo "Files in current directory:"
+          ls -la
+          npx vercel@latest --version
+          npx vercel@latest deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
 
   # Notification job
   notify:
