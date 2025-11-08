@@ -97,60 +97,30 @@ WSGI_APPLICATION = 'board_games.wsgi.application'
 import os
 
 if os.getenv('DATABASE_URL'):
-    # Production/Test database (PostgreSQL)
-    
+    # Production/Test database (PostgreSQL) 
     database_url = os.getenv('DATABASE_URL')
-    print(f"DATABASE_URL environment variable: {database_url[:50]}...")
-    
-    # Parse URL manually for better control over SSL settings
     parsed = urlparse(database_url)
     
     if 'render.com' in parsed.hostname or 'oregon-postgres.render.com' in parsed.hostname:
-        print("Using manual Render PostgreSQL configuration")
-        # Manual configuration for Render PostgreSQL
+        # Simplified Render PostgreSQL configuration
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
-                'NAME': parsed.path[1:],  # Remove leading slash
+                'NAME': parsed.path[1:],
                 'USER': parsed.username,
                 'PASSWORD': parsed.password,
                 'HOST': parsed.hostname,
                 'PORT': parsed.port or 5432,
-                'CONN_MAX_AGE': 600,
-                'CONN_HEALTH_CHECKS': True,
-                'OPTIONS': {
-                    'sslmode': 'require',
-                    'connect_timeout': 30,
-                }
             }
         }
     else:
-        # Use dj_database_url for other cases
-        db_config = dj_database_url.parse(
-            database_url,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-        
-        # Ensure PORT is set correctly
-        if not db_config.get('PORT'):
-            db_config['PORT'] = 5432
-        
-        db_host = db_config.get('HOST', '')
-        print(f"Database host: {db_host}")
-        
-        if db_host and 'localhost' not in db_host and '127.0.0.1' not in db_host:
-            # Other production PostgreSQL with standard SSL
-            print("Using standard PostgreSQL SSL configuration")
-            db_config['OPTIONS'] = {
-                'sslmode': 'require',
-            }
-        else:
-            print("Using localhost PostgreSQL configuration")
-        
-        DATABASES = {'default': db_config}
-    
-    print(f"Final database config: {DATABASES['default']}")
+        # Use dj_database_url for CI/CD and other environments
+        DATABASES = {
+            'default': dj_database_url.parse(
+                database_url,
+                conn_max_age=600 if 'localhost' not in database_url else 0,
+            )
+        }
 else:
     # Development database (SQLite)
     DATABASES = {
